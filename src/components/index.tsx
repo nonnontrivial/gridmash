@@ -5,8 +5,9 @@ import * as React from "react";
 import { v4 } from "uuid";
 import {
     Scalar,
-    Keys,
+    defaultKeyMap,
     Grid as GridModel,
+    Keys,
     KeyEvent,
     Reconciliation,
 } from "../model";
@@ -25,7 +26,8 @@ interface Props<S extends Scalar = Scalar> {
     data: GridModel<S>
     keyMap?: Map<keyof typeof Keys, string>;
     keyEvent?: KeyEvent;
-    reconciler(a: S, b: S): S;
+    reconciliationCondition(a: S): boolean;
+    reconcile(a: S, b: S): S;
     onReconciliation(rs: ArrayLike<Reconciliation<S>>): void;
     className?: string;
 }
@@ -33,11 +35,6 @@ interface Props<S extends Scalar = Scalar> {
 /**
  * Grid renders event-reconciling grid
  * @param {Props} props Props passed to the component
- * @abstract
- * 	Each non-zero element finds nearest non-zero element in direction
- * 	supplied by key event. `props.reconciler` is applied to these elements
- * 	taken together and an object describing the location and result of the
- * 	reconciliation is created.
  */
 const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     // Define mapping between direction and key event name
@@ -45,86 +42,41 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	if (props.keyMap) {
 	    return props.keyMap;
 	}
-	return new Map([
-	    [Keys.UP, "ArrowUp"],
-	    [Keys.DOWN, "ArrowDown"],
-	    [Keys.LEFT, "ArrowLeft"],
-	    [Keys.RIGHT, "ArrowRight"],
-	]);
+	return defaultKeyMap;
     }, [props.keyMap]);
-    const isNonzero = React.useCallback((n: Scalar | number) => {
-	return n !== 0;
-    }, []);
     const data = React.useMemo(() => props.data, [props.data]);
+    // TODO: implement remaining motions
     const reconcile = React.useCallback((direction: keyof typeof Keys): void => {
 	const reconciliations: Reconciliation<Scalar>[] = [];
-	for (const [i, row] of data.entries()) {
-	    for (const [j, col] of row.entries()) {
-		if (!isNonzero(col)) {
-		    continue;
+	switch (direction) {
+	    case Keys.RIGHT:
+		for (const [i, row] of data.entries()) {
+		    for (let [j, col] of row.entries()) {
+			const jPrime = j;
+			if (!props.reconciliationCondition(col)) {
+			    continue;
+			}
+			// Skip in the case that this is already a target of a
+			// reconciliation
+			if (reconciliations.find(r => r.dst[1] === j)) {
+			    continue;
+			}
+			while (++j <= row.length -1) {
+			    // Match has been discovered
+			    if (props.reconciliationCondition(row[j])) {
+				break;
+			    }
+			}
+			reconciliations.push({
+			    id: v4(),
+			    result: props.reconcile(col, row[j]),
+			    direction,
+			    src: [i, jPrime],
+			    dst: [i, j],
+			});
+		    }
 		}
-		const { length: rowLength } = row;
-		const firstNonZeroScalar = col;
-		let secondNonZeroScalar = col;
-		let rowIndexOfTarget = i;
-		let colIndexOfTarget = j;
-		// Find row and column indices of cell to reconcile; skip in the
-		// case that the current column is already direction-most
-		switch (direction) {
-		    case Keys.UP:
-			if (i === 0) {
-			    continue;
-			}
-			while (rowIndexOfTarget - 1 >= 0) {
-			    rowIndexOfTarget -= 1;
-			    if (isNonzero(data[rowIndexOfTarget][colIndexOfTarget])) {
-				break;
-			    }
-			}
-			break;
-		    case Keys.DOWN:
-			if (i === rowLength - 1) {
-			    continue;
-			}
-			while (rowIndexOfTarget + 1 <= rowLength - 1) {
-			    rowIndexOfTarget += 1;
-			    if (isNonzero(data[rowIndexOfTarget][colIndexOfTarget])) {
-				break;
-			    }
-			}
-			break;
-		    case Keys.LEFT:
-			if (j === 0) {
-			    continue;
-			}
-			while (colIndexOfTarget - 1 >= 0) {
-			    colIndexOfTarget -= 1;
-			    if (isNonzero(row[colIndexOfTarget])) {
-				break;
-			    }
-			}
-			break;
-		    case Keys.RIGHT:
-			if (j === rowLength - 1) {
-			    continue;
-			}
-			while (colIndexOfTarget + 1 <= rowLength - 1) {
-			    colIndexOfTarget += 1;
-			    if (isNonzero(row[colIndexOfTarget])) {
-				break;
-			    }
-			}
-			break;
-		}
-		reconciliations.push({
-		    id: v4(),
-		    input: direction,
-		    args: [firstNonZeroScalar, secondNonZeroScalar],
-		    result: props.reconciler(firstNonZeroScalar, secondNonZeroScalar),
-		    source: [i, j],
-		    target: [rowIndexOfTarget, colIndexOfTarget],
-		});
-	    }
+		break;
 	}
 	props.onReconciliation(reconciliations);
     }, [data]);

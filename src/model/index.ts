@@ -1,5 +1,5 @@
 /**
- * @fileoverview Exports interfaces and types
+ * @fileoverview Exports interfaces, types, and utils
  */
 import * as React from "react";
 
@@ -22,11 +22,10 @@ export type Grid<S extends Scalar> = S[][];
 
 export interface Reconciliation<S extends Scalar = number> {
     id: string;
-    args: [S, S];
     result: S;
-    input: keyof typeof Keys;
-    source: [number, number];
-    target: [number, number];
+    direction: keyof typeof Keys;
+    src: [number, number];
+    dst: [number, number];
 }
 
 export enum Keys {
@@ -38,3 +37,9 @@ export enum Keys {
 
 export type KeyEvent = "keydown" | "keypress" | "keyup";
 
+export const defaultKeyMap = new Map([
+    [Keys.UP, "ArrowUp"],
+    [Keys.DOWN, "ArrowDown"],
+    [Keys.LEFT, "ArrowLeft"],
+    [Keys.RIGHT, "ArrowRight"],
+]);
