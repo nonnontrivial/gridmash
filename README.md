@@ -32,7 +32,7 @@ The following example shows how to use `Grid` and `Cell` to render a reconciler.
 `<Grid />` will map arrow key press events to reconciliations in the grid between
 two viable cell values.
 
-> `Grid` does not have internal state, and assumes that any reconciliation it
+> `Grid` does not have internal state. It assumes that any reconciliation it
 identifies should be passed back into its `data` prop.
 
 ```tsx
