@@ -40,10 +40,38 @@ import {
 interface Props {}
 
 export default (props: Props): React.ReactElement => {
-    const [data, setData] = React.useState<GridModel<Scalar>>([]);
+    const [data, setData] = React.useState<GridModel<Scalar>>([[]]);
     return (
 	<Grid
 	    data={data}
+	/>
+    );
+}
+```
+
+### Mapping Custom Input Keys
+
+`Grid` can accept a `keyMap` prop which allows you to define what events should be mapped to which directions of movement in the grid.
+
+The default mapping is shown in the example below.
+
+```tsx
+import {
+    Grid,
+    Keys,
+} from "gridmash";
+
+export default () => {
+    const keyMap = new Map([
+	[Keys.UP, "ArrowUp"],
+	[Keys.DOWN, "ArrowDown"],
+	[Keys.LEFT, "ArrowLeft"],
+	[Keys.RIGHT, "ArrowRight"],
+    ]);
+    return (
+	<Grid
+	    data={[[]]}
+	    keyMap={keyMap}
 	/>
     );
 }
