@@ -45,7 +45,7 @@ export default (props: Props): React.ReactElement => {
 	<Grid
 	    data={data}
 	    reconcile={(a, b) => a + b}
-	    reconciliationCondition={n => n % 2 === 0}
+	    reconciliationCondition={n => n % 2 === 0 && n !== 0}
 	    onReconciliation={reconciliations => {
 	    }}
 	/>

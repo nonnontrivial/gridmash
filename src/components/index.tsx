@@ -26,7 +26,6 @@ interface Props<S extends Scalar = Scalar> {
     data: GridModel<S>
     keyMap?: Map<keyof typeof Keys, string>;
     keyEvent?: KeyEvent;
-    emptyCondition(a: S): boolean;
     reconciliationCondition(a: S): boolean;
     reconcile(a: S, b: S): S;
     onReconciliation(rs: ArrayLike<Reconciliation<S>>): void;
@@ -52,31 +51,36 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	switch (direction) {
 	    case Keys.RIGHT:
 		for (const [i, row] of data.entries()) {
-		    for (let [j, col] of row.entries()) {
-			if (props.emptyCondition(col)) {
-			    continue;
-			}
+		    for (const [j, col] of row.entries()) {
 			if (!props.reconciliationCondition(col)) {
 			    continue;
 			}
-			const jPrime = j;
-			// Skip in the case that this is already a target of a
-			// reconciliation
-			if (reconciliations.find(r => r.dst[1] === j)) {
+			// Skip in the case that this is already a destination
+			// of a reconciliation
+			if (reconciliations.find(reconciliation => {
+			    const [x, y] = reconciliation.dst;
+			    return x === i && y === j;
+			})) {
 			    continue;
 			}
-			while (++j <= row.length -1) {
+			let jPrime = j;
+			while (jPrime + 1 <= row.length -1) {
+			    jPrime += 1;
 			    // Match has been discovered and motion should halt
-			    if (props.reconciliationCondition(row[j])) {
+			    if (props.reconciliationCondition(row[jPrime])) {
 				break;
 			    }
 			}
+			// No reconciliation was found in this case
+			if (jPrime === j) {
+			    continue;
+			}
 			reconciliations.push({
 			    id: v4(),
-			    result: props.reconcile(col, row[j]),
+			    result: props.reconcile(col, row[jPrime]),
 			    direction,
-			    src: [i, jPrime],
-			    dst: [i, j],
+			    src: [i, j],
+			    dst: [i, jPrime],
 			});
 		    }
 		}
