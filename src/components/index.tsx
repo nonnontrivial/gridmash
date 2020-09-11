@@ -49,6 +49,12 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     const reconcile = React.useCallback((direction: keyof typeof Keys): void => {
 	const reconciliations: Reconciliation<Scalar>[] = [];
 	switch (direction) {
+	    case Keys.UP:
+		break;
+	    case Keys.DOWN:
+		break;
+	    case Keys.LEFT:
+		break;
 	    case Keys.RIGHT:
 		for (const [i, row] of data.entries()) {
 		    for (const [j, col] of row.entries()) {
