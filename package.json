@@ -1,0 +1,32 @@
+{
+  "name": "gridmash",
+  "description": "components for reconciling grids of scalar values",
+  "version": "0.0.1",
+  "main": "./dist/index.js",
+  "source": "./src/index.ts",
+  "scripts": {
+    "start": "tsc --watch",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "package": "npm pack"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "react",
+    "grid",
+    "mash"
+  ],
+  "peerDependencies": {
+    "react": "^16.0.0"
+  },
+  "author": "Kevin Donahue <nonnontrivial@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^16.9.46",
+    "@types/uuid": "^8.3.0",
+    "typescript": "^3.9.7",
+    "uuid": "^8.3.0"
+  }
+}

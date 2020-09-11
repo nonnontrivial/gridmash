@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "outDir": "dist/",
+        "module": "CommonJS",
+        "lib": ["ESNext","DOM"],
+        "moduleResolution": "node",
+        "jsx": "react",
+        "sourceMap": true,
+        "declaration": true,
+        "allowSyntheticDefaultImports": true,
+        "declarationMap": true,
+	"downlevelIteration": true,
+        "strict": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules/",
+        "dist/"
+    ]
+}
