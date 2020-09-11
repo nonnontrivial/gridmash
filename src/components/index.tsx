@@ -26,6 +26,7 @@ interface Props<S extends Scalar = Scalar> {
     data: GridModel<S>
     keyMap?: Map<keyof typeof Keys, string>;
     keyEvent?: KeyEvent;
+    emptyCondition(a: S): boolean;
     reconciliationCondition(a: S): boolean;
     reconcile(a: S, b: S): S;
     onReconciliation(rs: ArrayLike<Reconciliation<S>>): void;
@@ -52,17 +53,20 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    case Keys.RIGHT:
 		for (const [i, row] of data.entries()) {
 		    for (let [j, col] of row.entries()) {
-			const jPrime = j;
+			if (props.emptyCondition(col)) {
+			    continue;
+			}
 			if (!props.reconciliationCondition(col)) {
 			    continue;
 			}
+			const jPrime = j;
 			// Skip in the case that this is already a target of a
 			// reconciliation
 			if (reconciliations.find(r => r.dst[1] === j)) {
 			    continue;
 			}
 			while (++j <= row.length -1) {
-			    // Match has been discovered
+			    // Match has been discovered and motion should halt
 			    if (props.reconciliationCondition(row[j])) {
 				break;
 			    }
