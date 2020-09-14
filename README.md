@@ -75,15 +75,15 @@ The default mapping is shown in the example below.
 ```tsx
 import {
     Grid,
-    Keys,
+    Motion,
 } from "gridmash";
 
 export default () => {
     const keyMap = new Map([
-	[Keys.UP, "ArrowUp"],
-	[Keys.DOWN, "ArrowDown"],
-	[Keys.LEFT, "ArrowLeft"],
-	[Keys.RIGHT, "ArrowRight"],
+	[Motion.UP, "ArrowUp"],
+	[Motion.DOWN, "ArrowDown"],
+	[Motion.LEFT, "ArrowLeft"],
+	[Motion.RIGHT, "ArrowRight"],
     ]);
     return (
 	<Grid

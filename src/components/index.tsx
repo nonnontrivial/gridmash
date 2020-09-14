@@ -7,7 +7,7 @@ import {
     Scalar,
     defaultKeyMap,
     Grid as GridModel,
-    Keys,
+    Motion,
     KeyEvent,
     Reconciliation,
 } from "../model";
@@ -18,13 +18,13 @@ export {
     Grid as GridModel,
     Scalar,
     Reconciliation,
-    Keys,
+    Motion,
     KeyEvent,
 } from "../model";
 
 interface Props<S extends Scalar = Scalar> {
     data: GridModel<S>
-    keyMap?: Map<keyof typeof Keys, string>;
+    keyMap?: Map<keyof typeof Motion, string>;
     keyEvent?: KeyEvent;
     reconciliationCondition(a: S): boolean;
     reconcile(a: S, b: S): S;
@@ -38,35 +38,42 @@ interface Props<S extends Scalar = Scalar> {
  */
 const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     // Define mapping between direction and key event name
-    const keys = React.useMemo<Map<keyof typeof Keys, string>>(() => {
+    const keys = React.useMemo<Map<keyof typeof Motion, string>>(() => {
 	if (props.keyMap) {
 	    return props.keyMap;
 	}
 	return defaultKeyMap;
     }, [props.keyMap]);
     const data = React.useMemo(() => props.data, [props.data]);
+    // Determine if a certain i and j paired with reconciliations should short
+    // circuit a reconciliation loop
+    const containsQuitCondition = React.useCallback(
+	(rs: Reconciliation[], i: number, j: number): boolean => {
+	    const col = data[i][j];
+	    if (!props.reconciliationCondition(col)) {
+		return true;
+	    } else if (rs.find(reconciliation => {
+		const [x, y] = reconciliation.dst;
+		return x === i && y === j;
+	    })) {
+		return true;
+	    }
+	    return false;
+	}, [props.reconciliationCondition, data]);
     // TODO: implement remaining motions
-    const reconcile = React.useCallback((direction: keyof typeof Keys): void => {
+    const reconcile = React.useCallback((motion: keyof typeof Motion): void => {
 	const reconciliations: Reconciliation<Scalar>[] = [];
-	switch (direction) {
-	    case Keys.UP:
+	switch (motion) {
+	    case Motion.UP:
 		break;
-	    case Keys.DOWN:
+	    case Motion.DOWN:
 		break;
-	    case Keys.LEFT:
+	    case Motion.LEFT:
 		break;
-	    case Keys.RIGHT:
+	    case Motion.RIGHT:
 		for (const [i, row] of data.entries()) {
 		    for (const [j, col] of row.entries()) {
-			if (!props.reconciliationCondition(col)) {
-			    continue;
-			}
-			// Skip in the case that this is already a destination
-			// of a reconciliation
-			if (reconciliations.find(reconciliation => {
-			    const [x, y] = reconciliation.dst;
-			    return x === i && y === j;
-			})) {
+			if (containsQuitCondition(reconciliations, i, j)) {
 			    continue;
 			}
 			let jPrime = j;
@@ -84,7 +91,7 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 			reconciliations.push({
 			    id: v4(),
 			    result: props.reconcile(col, row[jPrime]),
-			    direction,
+			    motion,
 			    src: [i, j],
 			    dst: [i, jPrime],
 			});
@@ -98,17 +105,17 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     React.useEffect(() => {
 	const onKeyEvent = (e: React.KeyboardEvent<HTMLDivElement>) => {
 	    switch (e.key) {
-		case keys.get(Keys.UP):
-		    reconcile(Keys.UP);
+		case keys.get(Motion.UP):
+		    reconcile(Motion.UP);
 		    break;
-		case keys.get(Keys.DOWN):
-		    reconcile(Keys.DOWN);
+		case keys.get(Motion.DOWN):
+		    reconcile(Motion.DOWN);
 		    break;
-		case keys.get(Keys.LEFT):
-		    reconcile(Keys.LEFT);
+		case keys.get(Motion.LEFT):
+		    reconcile(Motion.LEFT);
 		    break;
-		case keys.get(Keys.RIGHT):
-		    reconcile(Keys.RIGHT);
+		case keys.get(Motion.RIGHT):
+		    reconcile(Motion.RIGHT);
 		    break;
 	    }
 	};

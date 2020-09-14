@@ -23,12 +23,12 @@ export type Grid<S extends Scalar> = S[][];
 export interface Reconciliation<S extends Scalar = number> {
     id: string;
     result: S;
-    direction: keyof typeof Keys;
+    motion: keyof typeof Motion;
     src: [number, number];
     dst: [number, number];
 }
 
-export enum Keys {
+export enum Motion {
     UP = "UP",
     DOWN = "DOWN",
     LEFT = "LEFT",
@@ -38,8 +38,8 @@ export enum Keys {
 export type KeyEvent = "keydown" | "keypress" | "keyup";
 
 export const defaultKeyMap = new Map([
-    [Keys.UP, "ArrowUp"],
-    [Keys.DOWN, "ArrowDown"],
-    [Keys.LEFT, "ArrowLeft"],
-    [Keys.RIGHT, "ArrowRight"],
+    [Motion.UP, "ArrowUp"],
+    [Motion.DOWN, "ArrowDown"],
+    [Motion.LEFT, "ArrowLeft"],
+    [Motion.RIGHT, "ArrowRight"],
 ]);
