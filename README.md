@@ -32,7 +32,7 @@ The following example shows how to use `Grid` and `Cell` to render a reconciler.
 `<Grid />` will map arrow key press events to reconciliations in the grid between
 two viable cell values.
 
-> `Grid` does not have internal state. It assumes that any reconciliation it
+> `Grid` **does not have internal state**. It assumes that any reconciliation it
 identifies should be passed back into its `data` prop.
 
 ```tsx
@@ -56,11 +56,7 @@ export default (props: Props): React.ReactElement => {
 	    data={data}
 	    reconcile={(a, b) => a + b}
 	    reconciliationCondition={n => n % 2 === 0 && n !== 0}
-	    onReconciliation={reconciliations => {
-		for (const r of reconciliations) {
-		    console.log(r);
-		}
-	    }}
+	    onReconciliation={reconciliation => {}}
 	/>
     );
 }

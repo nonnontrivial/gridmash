@@ -28,21 +28,22 @@ interface Props<S extends Scalar = Scalar> {
     keyEvent?: KeyEvent;
     reconciliationCondition(a: S): boolean;
     reconcile(a: S, b: S): S;
-    onReconciliation(rs: ArrayLike<Reconciliation<S>>): void;
+    onReconciliation(rs: Reconciliation<S>): void;
     className?: string;
 }
 
 /**
  * Grid renders event-reconciling grid
  *
- * When a motion is inputted, attempts to produce an array of reconciliations.
- * Reconciliations are locations in the grid where 2 columns should combine
- * based on rules provided to the props and the values of all other columns.
+ * When a motion is inputted this component attempts to produce an array of
+ * reconciliations. Reconciliations are locations in the grid where 2 columns
+ * should combine based on rules provided to the props and the values between
+ * those columns.
  *
  * @param {Props} props Props passed to the component
  */
 const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
-    // Mapping between direction and key event name
+    // Mapping between direction and key event name.
     const keys = React.useMemo<Map<keyof typeof Motion, string>>(() => {
 	if (props.keyMap) {
 	    return props.keyMap;
@@ -51,7 +52,7 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     }, [props.keyMap]);
     const data = React.useMemo(() => props.data, [props.data]);
     // Determine if an i and j paired with reconciliations should short circuit
-    // a reconciliation loop
+    // a reconciliation loop.
     const containsQuitCondition = React.useCallback(
 	(rs: Reconciliation[], i: number, j: number): boolean => {
 	    const col = data[i][j];
@@ -66,6 +67,8 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    return false;
 	}, [props.reconciliationCondition, data]);
     // TODO: implement remaining motions
+    // Iterates over data in the direction of the motion.
+    // This is done in order to have reconciliations built up in order.
     const reconcile = React.useCallback((motion: keyof typeof Motion): void => {
 	const reconciliations: Reconciliation<Scalar>[] = [];
 	switch (motion) {
@@ -77,25 +80,23 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 		break;
 	    case Motion.RIGHT:
 		for (const [i, row] of data.entries()) {
-		    for (const [j, col] of row.entries()) {
+		    for (const [j] of row.entries()) {
 			if (containsQuitCondition(reconciliations, i, j)) {
 			    continue;
 			}
 			let jPrime = j;
 			while (jPrime + 1 <= row.length -1) {
 			    jPrime += 1;
-			    // Match has been discovered and motion should halt
 			    if (props.reconciliationCondition(row[jPrime])) {
 				break;
 			    }
 			}
-			// No reconciliation was found in this case
 			if (jPrime === j) {
 			    continue;
 			}
 			reconciliations.push({
 			    id: v4(),
-			    result: props.reconcile(col, row[jPrime]),
+			    result: props.reconcile(row[j], row[jPrime]),
 			    motion,
 			    src: [i, j],
 			    dst: [i, jPrime],
@@ -104,9 +105,11 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 		}
 		break;
 	}
-	props.onReconciliation(reconciliations);
-    }, [data]);
-    // Use an event listener to trigger reconciliations
+	for (const r of reconciliations) {
+	    props.onReconciliation(r);
+	}
+    }, [data, props.reconciliationCondition, props.reconcile]);
+    // Register event listener on motions to trigger reconciliations.
     React.useEffect(() => {
 	const onKeyEvent = (e: React.KeyboardEvent<HTMLDivElement>) => {
 	    switch (e.key) {
