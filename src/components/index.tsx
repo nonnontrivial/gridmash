@@ -34,10 +34,15 @@ interface Props<S extends Scalar = Scalar> {
 
 /**
  * Grid renders event-reconciling grid
+ *
+ * When a motion is inputted, attempts to produce an array of reconciliations.
+ * Reconciliations are locations in the grid where 2 columns should combine
+ * based on rules provided to the props and the values of all other columns.
+ *
  * @param {Props} props Props passed to the component
  */
 const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
-    // Define mapping between direction and key event name
+    // Mapping between direction and key event name
     const keys = React.useMemo<Map<keyof typeof Motion, string>>(() => {
 	if (props.keyMap) {
 	    return props.keyMap;
@@ -45,8 +50,8 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	return defaultKeyMap;
     }, [props.keyMap]);
     const data = React.useMemo(() => props.data, [props.data]);
-    // Determine if a certain i and j paired with reconciliations should short
-    // circuit a reconciliation loop
+    // Determine if an i and j paired with reconciliations should short circuit
+    // a reconciliation loop
     const containsQuitCondition = React.useCallback(
 	(rs: Reconciliation[], i: number, j: number): boolean => {
 	    const col = data[i][j];
@@ -119,8 +124,7 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 		    break;
 	    }
 	};
-	const defaultKeyEvent = "keydown";
-	const keyEvent = props.keyEvent ?? defaultKeyEvent;
+	const keyEvent = props.keyEvent ?? "keydown";
 	window.addEventListener(keyEvent, onKeyEvent as any);
 	return () => {
 	    window.removeEventListener(keyEvent, onKeyEvent as any);
@@ -154,3 +158,6 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 
 export default Grid;
 
+export {
+    Grid,
+}
