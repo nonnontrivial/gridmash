@@ -51,12 +51,15 @@ export default (props: Props): React.ReactElement => {
 	[0, 0, 0],
 	[0, 3, 3],
     ]);
+    const onReconciliation = React.useCallback((reconciliation) => {
+	const { result, src, dst } = reconciliation;
+    }, []);
     return (
 	<Grid
 	    data={data}
 	    reconcile={(a, b) => a + b}
 	    reconciliationCondition={n => n % 2 === 0 && n !== 0}
-	    onReconciliation={reconciliation => {}}
+	    onReconciliation={onReconciliation}
 	/>
     );
 }

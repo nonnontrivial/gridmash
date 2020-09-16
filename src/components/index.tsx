@@ -33,14 +33,16 @@ interface Props<S extends Scalar = Scalar> {
 }
 
 /**
- * Grid renders event-reconciling grid
+ * Grid renders event-reconciling grid.
  *
  * When a motion is inputted this component attempts to produce an array of
  * reconciliations. Reconciliations are locations in the grid where 2 columns
  * should combine based on rules provided to the props and the values between
- * those columns.
+ * those columns. These reconciliations are each sent to the onReconciliation
+ * callback prop.
  *
  * @param {Props} props Props passed to the component
+ * @returns React node
  */
 const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     // Mapping between direction and key event name.
