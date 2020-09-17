@@ -12,8 +12,10 @@ interface Props<V extends Scalar = Scalar> {
 }
 
 /**
- * Cell renders a cell which holds a value
+ * Cell renders a value-holding cell.
+ *
  * @param {Props} props Props passed to the component
+ * @returns React node
  */
 const Cell: React.FC<Props> = (props: Props): React.ReactElement => {
     return (

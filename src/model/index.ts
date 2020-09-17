@@ -4,8 +4,10 @@
 import * as React from "react";
 
 /**
- * renderInOrder forms a new array of react children suitable for rendering
+ * Forms new array of react children suitable for rendering in the grid.
+ *
  * @param children React children
+ * @returns Array of React nodes 
  */
 export function renderInOrder(children: React.ReactNode): React.ReactNode[] {
     // TODO: switch API to allow this to work
