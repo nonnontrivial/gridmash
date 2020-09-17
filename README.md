@@ -41,6 +41,7 @@ import {
     Grid,
     GridModel,
     Scalar,
+    Cell,
 } from "gridmash";
 
 interface Props {}
@@ -52,11 +53,12 @@ export default (props: Props): React.ReactElement => {
 	[0, 3, 3],
     ]);
     const onReconciliation = React.useCallback((reconciliation) => {
-	const { result, src, dst } = reconciliation;
+	const { result, location } = reconciliation;
     }, []);
     return (
 	<Grid
 	    data={data}
+	    cell={Cell}
 	    reconcile={(a, b) => a + b}
 	    reconciliationCondition={n => n % 2 === 0 && n !== 0}
 	    onReconciliation={onReconciliation}
