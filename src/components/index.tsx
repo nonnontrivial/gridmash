@@ -11,7 +11,7 @@ import {
     KeyEvent,
     Reconciliation,
 } from "../model";
-import { default as Cell } from "./cell";
+import { Props as CellProps } from "./cell";
 
 export * from "./cell";
 export {
@@ -24,9 +24,9 @@ export {
 
 interface Props<S extends Scalar = Scalar> {
     data: GridModel<S>
+    cell: React.FC<CellProps>;
     keyMap?: Map<keyof typeof Motion, string>;
     keyEvent?: KeyEvent;
-    cell?: React.ReactNode;
     reconciliationCondition(a: S): boolean;
     reconcile(a: S, b: S): S;
     onReconciliation(rs: Reconciliation<S>): void;
@@ -79,11 +79,12 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    let prev: [Scalar, Scalar] | null = null;
 	    let index = 0;
 	    for (const l of markedLocations) {
-		index += 1;
 		if (index % 2 === 0) {
 		    prev = l;
+		    index += 1;
 		    continue;
 		}
+		index += 1;
 		const [rowIndexA, colIndexA] = prev;
 		const [rowIndexB, colIndexB] = l;
 		const a = props.data[rowIndexA][colIndexA];
@@ -91,11 +92,11 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 		props.onReconciliation({
 		    id: v4(),
 		    motion,
-		    args: new Set([a, b]),
+		    args: [a, b],
 		    result: props.reconcile(a, b),
 		    location: {
-			src: new Set([rowIndexA, colIndexA]),
-			dst: new Set([rowIndexB, colIndexB]),
+			src: [rowIndexA, colIndexA],
+			dst: [rowIndexB, colIndexB],
 		    },
 		});
 	    }
@@ -114,11 +115,11 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 		    const i = rowSize - 1;
 		    let ii = i;
 		    while (ii - 1 >= 0) {
-			ii -= 1;
 			const value = props.data[ii][j];
 			if (props.reconciliationCondition(value)) {
 			    locationsInColumn.add([ii, j]);
 			}
+			ii -= 1;
 		    }
 		    reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
 		}
@@ -143,8 +144,6 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 		    const locationsInRow: Locations = new Set([]);
 		    let jj = rowSize - 1;
 		    for (let j = jj; j >= 0; j -= 1) {
-			// Keep track of last iterated-over index for the outer
-			// scope.
 			jj = j;
 			const value = r[j];
 			if (props.reconciliationCondition(value)) {
@@ -206,8 +205,9 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    window.removeEventListener(keyEvent, onKeyEvent as any);
 	}
     }, [props.keyMap]);
-    // TODO: Figure out API around cells.
+    // Store the cells to render.
     const cells = React.useMemo(() => {
+	const { cell: Cell } = props;
 	return props.data.map((row, i) => {
 	    return (
 		<div
@@ -217,8 +217,9 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 			return (
 			    <Cell
 				key={j}
-				value={col}
-			    />
+			    >
+				<span>{col}</span>
+			    </Cell>
 			);
 		    })}
 		</div>

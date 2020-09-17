@@ -22,14 +22,16 @@ export type Scalar = number;
 
 export type Grid<S extends Scalar> = S[][];
 
+type Tuple<S extends Scalar> = [S, S];
+
 export interface Reconciliation<S extends Scalar = number> {
     id: string;
     motion: keyof typeof Motion,
-    args: Set<S>;
+    args: Tuple<S>;
     result: S;
     location: {
-	src: Set<S>,
-	dst: Set<S>,
+	src: Tuple<S>,
+	dst: Tuple<S>,
     };
 }
 
