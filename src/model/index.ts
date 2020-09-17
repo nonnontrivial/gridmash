@@ -24,10 +24,13 @@ export type Grid<S extends Scalar> = S[][];
 
 export interface Reconciliation<S extends Scalar = number> {
     id: string;
+    motion: keyof typeof Motion,
+    args: Set<S>;
     result: S;
-    motion: keyof typeof Motion;
-    src: [number, number];
-    dst: [number, number];
+    location: {
+	src: Set<S>,
+	dst: Set<S>,
+    };
 }
 
 export enum Motion {

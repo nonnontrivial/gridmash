@@ -46,6 +46,7 @@ interface Props<S extends Scalar = Scalar> {
  * @returns React node
  */
 const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
+    // Effectively transpose the matrix in the data prop. 
     const columns = React.useMemo(() => {
 	const cs: GridModel<Scalar | number> = [];
 	for (const [, row] of props.data.entries()) {
@@ -59,46 +60,60 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	}
 	return cs;
     }, [props.data]);
+    // Keep a local copy of the data that does not change across renders.
     const rows = React.useMemo(() => {
 	return props.data.map(row => row);
     }, [props.data]);
-    // Determines if an i and j paired with reconciliations should short circuit
-    // reconciliation loop.
-    const containsQuitCondition = React.useCallback(
-	(rs: Reconciliation[], i: number, j: number): boolean => {
-	    const col = props.data[i][j];
-	    if (!props.reconciliationCondition(col)) {
-		return true;
-	    } else if (rs.find(reconciliation => {
-		const [x, y] = reconciliation.dst;
-		return x === i && y === j;
-	    })) {
-		return true;
-	    }
-	    return false;
-	}, [props.reconciliationCondition, props.data]);
-    // TODO: Implement remaining motions and refactor
     // Finds all reconciliations in the data and sends them to the callback prop.
     const reconcile = React.useCallback((motion: keyof typeof Motion): void => {
-	const reconciliations: Reconciliation<Scalar>[] = [];
-	type Data = {
-	    row: Scalar[],
-	    i: number,
-	    j: number,
-	    jPrime: number,
-	};
-	const formReconciliation = (data: Data): Reconciliation<number> => {
-	    const { row, i, j, jPrime } = data;
-	    return {
-		id: v4(),
-		result: props.reconcile(row[j], row[jPrime]),
-		motion,
-		src: [i, j],
-		dst: [i, jPrime],
-	    }
-	}
+	const [column] = columns;
+	const [row] = props.data;
+	const columnSize = column.length;
+	const rowSize = row.length;
+	// Each motion established the locations where reconciliations should
+	// take place.
 	switch (motion) {
 	    case Motion.UP:
+		for (let j = columnSize - 1; j >= 0; j -= 1) {
+		    const locationsInColumn: Set<[Scalar, Scalar]> = new Set([]);
+		    const i = rowSize - 1;
+		    let ii = i;
+		    while (ii - 1 >= 0) {
+			ii -= 1;
+			const value = props.data[ii][j];
+			if (props.reconciliationCondition(value)) {
+			    locationsInColumn.add([ii, j]);
+			}
+		    }
+		    // In the case that there are not an even number of elements
+		    // to reconcile, the last added element should be removed.
+		    if (locationsInColumn.size % 2 !== 0) {
+			locationsInColumn.delete([ii, j]);
+		    }
+		    let prev: [Scalar, Scalar] | null = null;
+		    let index = 0;
+		    for (const l of locationsInColumn) {
+			index += 1;
+			if (index % 2 === 0) {
+			    prev = l;
+			    continue;
+			}
+			const [rowIndexA, colIndexA] = prev;
+			const [rowIndexB, colIndexB] = l;
+			const a = props.data[rowIndexA][colIndexA];
+			const b = props.data[rowIndexB][colIndexB];
+			props.onReconciliation({
+			    id: v4(),
+			    motion,
+			    args: new Set([a, b]),
+			    result: props.reconcile(a, b),
+			    location: {
+				src: new Set([rowIndexA, colIndexA]),
+				dst: new Set([rowIndexB, colIndexB]),
+			    },
+			});
+		    }
+		}
 		break;
 	    case Motion.DOWN:
 		break;
@@ -107,10 +122,13 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    case Motion.RIGHT:
 		break;
 	}
-	for (const r of reconciliations) {
-	    props.onReconciliation(r);
-	}
-    }, [rows, columns, props.reconciliationCondition, props.reconcile]);
+    }, [
+	rows,
+	columns,
+	props.reconciliationCondition,
+	props.reconcile,
+	props.onReconciliation
+    ]);
     // Mapping between direction and key event name.
     const keys = React.useMemo<Map<keyof typeof Motion, string>>(() => {
 	if (props.keyMap) {
