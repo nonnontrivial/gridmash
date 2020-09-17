@@ -64,18 +64,53 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     const rows = React.useMemo(() => {
 	return props.data.map(row => row);
     }, [props.data]);
+    type Pair = [Scalar, Scalar]
+    type Locations = Set<Pair>;
+    // TODO: document
+    const reconcileMarkedLocations = React.useCallback(
+	(locations: Locations, lastLocation: Pair, motion: keyof typeof Motion): void => {
+	    const [ii, jj] = lastLocation;
+	    const markedLocations = locations;
+	    // In the case that there are not an even number of elements
+	    // to reconcile, the last added element should be removed.
+	    if (markedLocations.size % 2 !== 0) {
+		markedLocations.delete([ii, jj]);
+	    }
+	    let prev: [Scalar, Scalar] | null = null;
+	    let index = 0;
+	    for (const l of markedLocations) {
+		index += 1;
+		if (index % 2 === 0) {
+		    prev = l;
+		    continue;
+		}
+		const [rowIndexA, colIndexA] = prev;
+		const [rowIndexB, colIndexB] = l;
+		const a = props.data[rowIndexA][colIndexA];
+		const b = props.data[rowIndexB][colIndexB];
+		props.onReconciliation({
+		    id: v4(),
+		    motion,
+		    args: new Set([a, b]),
+		    result: props.reconcile(a, b),
+		    location: {
+			src: new Set([rowIndexA, colIndexA]),
+			dst: new Set([rowIndexB, colIndexB]),
+		    },
+		});
+	    }
+	}, [rows, columns]);
     // Finds all reconciliations in the data and sends them to the callback prop.
     const reconcile = React.useCallback((motion: keyof typeof Motion): void => {
 	const [column] = columns;
 	const [row] = props.data;
 	const columnSize = column.length;
 	const rowSize = row.length;
-	// Each motion established the locations where reconciliations should
-	// take place.
+	// Motions establish locations where reconciliations should take place.
 	switch (motion) {
 	    case Motion.UP:
 		for (let j = columnSize - 1; j >= 0; j -= 1) {
-		    const locationsInColumn: Set<[Scalar, Scalar]> = new Set([]);
+		    const locationsInColumn: Locations = new Set([]);
 		    const i = rowSize - 1;
 		    let ii = i;
 		    while (ii - 1 >= 0) {
@@ -85,41 +120,52 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 			    locationsInColumn.add([ii, j]);
 			}
 		    }
-		    // In the case that there are not an even number of elements
-		    // to reconcile, the last added element should be removed.
-		    if (locationsInColumn.size % 2 !== 0) {
-			locationsInColumn.delete([ii, j]);
-		    }
-		    let prev: [Scalar, Scalar] | null = null;
-		    let index = 0;
-		    for (const l of locationsInColumn) {
-			index += 1;
-			if (index % 2 === 0) {
-			    prev = l;
-			    continue;
-			}
-			const [rowIndexA, colIndexA] = prev;
-			const [rowIndexB, colIndexB] = l;
-			const a = props.data[rowIndexA][colIndexA];
-			const b = props.data[rowIndexB][colIndexB];
-			props.onReconciliation({
-			    id: v4(),
-			    motion,
-			    args: new Set([a, b]),
-			    result: props.reconcile(a, b),
-			    location: {
-				src: new Set([rowIndexA, colIndexA]),
-				dst: new Set([rowIndexB, colIndexB]),
-			    },
-			});
-		    }
+		    reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
 		}
 		break;
 	    case Motion.DOWN:
+		for (const [j] of columns.entries()) {
+		    const locationsInColumn: Locations = new Set([]);
+		    const i = 0;
+		    let ii = i;
+		    while (ii + 1 <= rowSize - 1) {
+			ii += 1;
+			const value = props.data[ii][j];
+			if (props.reconciliationCondition(value)) {
+			    locationsInColumn.add([ii, j]);
+			}
+		    }
+		    reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
+		}
 		break;
 	    case Motion.LEFT:
+		for (const [i, r] of rows.entries()) {
+		    const locationsInRow: Locations = new Set([]);
+		    let jj = rowSize - 1;
+		    for (let j = jj; j >= 0; j -= 1) {
+			// Keep track of last iterated-over index for the outer
+			// scope.
+			jj = j;
+			const value = r[j];
+			if (props.reconciliationCondition(value)) {
+			    locationsInRow.add([i, j]);
+			}
+		    }
+		    reconcileMarkedLocations(locationsInRow, [i, jj], motion);
+		}
 		break;
 	    case Motion.RIGHT:
+		for (const [i, r] of rows.entries()) {
+		    const locationsInRow: Locations = new Set([]);
+		    let jj = 0;
+		    for (const [j, value] of r.entries()) {
+			jj = j;
+			if (props.reconciliationCondition(value)) {
+			    locationsInRow.add([i, j]);
+			}
+		    }
+		    reconcileMarkedLocations(locationsInRow, [i, jj], motion);
+		}
 		break;
 	}
     }, [
