@@ -32,12 +32,13 @@ The following example shows how to use `Grid` and `Cell` to render a reconciler.
 `<Grid />` will map arrow key press events to **reconciliations** in the grid between
 two viable cell values.
 
-A reconciliation is defined by `props.reconcile`, and occurs when 2 cell values
+A reconciliation is defined by `props.reconcile`, and occurs when two cell values
 fulfill `props.reconciliationCondition` and are in the motion-dependant path of
 one another.
 
 > `Grid` **does not have internal state**. It assumes that any reconciliation it
-identifies should be passed back into its `data` prop.
+identifies should be passed back into its `data` prop if it is desired to have
+`Grid` update with new cell values.
 
 ```tsx
 import * as React from "react";
