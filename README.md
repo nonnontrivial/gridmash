@@ -15,7 +15,7 @@
 |Component | Implemented | PR | Issue |
 |:---------|:-----------:|:--:|:-----:|
 |Grid      |✔️            |-   |-      |
-|Cell      |-            |-   |[#1](https://github.com/nonnontrivial/gridmash/issues/1)|
+|Cell      |✔️            |-   |-      |
 
 ## Installation
 
@@ -52,16 +52,31 @@ export default (props: Props): React.ReactElement => {
 	[0, 0, 0],
 	[0, 3, 3],
     ]);
-    const onReconciliation = React.useCallback((reconciliation) => {
-	const { result, location } = reconciliation;
-    }, []);
     return (
 	<Grid
+	    // 2d array of scalar values that each cell should hold.
 	    data={data}
-	    cell={Cell}
+	    // How each inner value should be rendered.
+	    cell={(value: Scalar, key: string) => {
+		return (
+		    <Cell
+			value={value}
+			key={key}
+			style={{
+			    display: "inline-block",
+			    padding: "20px",
+			}}
+		    />
+		);
+	    }}
+	    // The operation to perform between two cells when they reconcile.
 	    reconcile={(a, b) => a + b}
+	    // What must be true about a cell in order for it to reconcile.
 	    reconciliationCondition={n => n % 2 === 0 && n !== 0}
-	    onReconciliation={onReconciliation}
+	    // What to do when a reconciliation is found.
+	    onReconciliation={(reconciliation) => {
+		console.log(reconciliation);
+	    }}
 	/>
     );
 }
