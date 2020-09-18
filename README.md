@@ -72,7 +72,7 @@ export default (props: Props): React.ReactElement => {
 	    // The operation to perform between two cells when they reconcile.
 	    reconcile={(a, b) => a + b}
 	    // What must be true about a cell in order for it to reconcile.
-	    reconciliationCondition={n => n % 2 === 0 && n !== 0}
+	    reconciliationCondition={a => a % 2 === 0 && a !== 0}
 	    // What to do when a reconciliation is found.
 	    onReconciliation={(reconciliation) => {
 		console.log(reconciliation);
@@ -86,15 +86,16 @@ export default (props: Props): React.ReactElement => {
 
 `Grid` can accept a `keyMap` prop which allows you to define what events should be mapped to which directions of movement in the grid.
 
-The default mapping is shown in the example below.
-
 ```tsx
 import {
     Grid,
     Motion,
 } from "gridmash";
 
-export default () => {
+interface Props {}
+
+export default (props: Props): React.ReactElement => {
+    // This is the default mapping which relates motions to keydown events.
     const keyMap = new Map([
 	[Motion.UP, "ArrowUp"],
 	[Motion.DOWN, "ArrowDown"],
