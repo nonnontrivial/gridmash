@@ -1,7 +1,7 @@
 {
   "name": "gridmash",
   "description": "components for reconciling grids of scalar values",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "./dist/index.js",
   "source": "./src/index.ts",
   "scripts": {
