@@ -1,5 +1,5 @@
 /**
- * @fileoverview Defines Grid and exports all public components
+ * @fileoverview Defines Grid and exports all public exports
  */
 import * as React from "react";
 import { v4 } from "uuid";
@@ -84,6 +84,8 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    let prev: [Scalar, Scalar] | null = null;
 	    let index = 0;
 	    for (const l of markedLocations) {
+		// In the case that this is an even index, we need to track it
+		// for the next iteration.
 		if (index % 2 === 0) {
 		    prev = l;
 		    index += 1;
@@ -112,7 +114,8 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	const [row] = props.data;
 	const columnSize = column.length;
 	const rowSize = row.length;
-	// Motions establish locations where reconciliations should take place.
+	// Establish locations where reconciliations should take place depending
+	// on the given motion.
 	switch (motion) {
 	    case Motion.UP:
 		for (let j = columnSize - 1; j >= 0; j -= 1) {
