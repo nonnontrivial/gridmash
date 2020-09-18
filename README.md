@@ -15,7 +15,7 @@
 |Component | Implemented | PR | Issue |
 |:---------|:-----------:|:--:|:-----:|
 |Grid      |✔️            |-   |-      |
-|Cell      |-            |-   |-      |
+|Cell      |-            |-   |[#1](https://github.com/nonnontrivial/gridmash/issues/1)|
 
 ## Installation
 

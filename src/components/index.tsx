@@ -66,9 +66,14 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     }, [props.data]);
     type Pair = [Scalar, Scalar]
     type Locations = Set<Pair>;
-    // TODO: document
+    // Calls reconciliation method provided in props on pairs of condition-
+    // passing locations in the data prop.
     const reconcileMarkedLocations = React.useCallback(
-	(locations: Locations, lastLocation: Pair, motion: keyof typeof Motion): void => {
+	(
+	    locations: Locations,
+	    lastLocation: Pair,
+	    motion: keyof typeof Motion,
+	): void => {
 	    const [ii, jj] = lastLocation;
 	    const markedLocations = locations;
 	    // In the case that there are not an even number of elements
