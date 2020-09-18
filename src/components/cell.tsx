@@ -2,9 +2,10 @@
  * @fileoverview Defines Cell component
  */
 import * as React from "react";
+import { Scalar } from "../model";
 
-export interface Props {
-    children: React.ReactElement;
+interface Props<S extends Scalar = Scalar> {
+    value: S;
     style?: {
 	[key: string]: string | number;
     };
@@ -18,8 +19,8 @@ export interface Props {
  */
 const Cell: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
-	<div style={{ display: "inline-block", ...props.style }}>
-	    {props.children}
+	<div style={{ ...props.style }}>
+	    {props.value}
 	</div>
     );
 }

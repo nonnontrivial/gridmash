@@ -11,7 +11,6 @@ import {
     KeyEvent,
     Reconciliation,
 } from "../model";
-import { Props as CellProps } from "./cell";
 
 export * from "./cell";
 export {
@@ -24,7 +23,7 @@ export {
 
 interface Props<S extends Scalar = Scalar> {
     data: GridModel<S>
-    cell: React.FC<CellProps>;
+    cell: (v: S, k: string) => React.ReactElement;
     keyMap?: Map<keyof typeof Motion, string>;
     keyEvent?: KeyEvent;
     reconciliationCondition(a: S): boolean;
@@ -213,22 +212,17 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    window.removeEventListener(keyEvent, onKeyEvent as any);
 	}
     }, [props.keyMap]);
-    // Store the cells to render.
+    // Pass values to cells before rendering.
     const cells = React.useMemo(() => {
-	const { cell: Cell } = props;
 	return props.data.map((row, i) => {
 	    return (
 		<div
 		    key={i}
 		>
-		    {row.map((col, j) => {
-			return (
-			    <Cell
-				key={j}
-			    >
-				<span>{col}</span>
-			    </Cell>
-			);
+		    {row.map((value) => {
+			const key = v4();
+			const Cell = props.cell(value, key);
+			return Cell;
 		    })}
 		</div>
 	    );
