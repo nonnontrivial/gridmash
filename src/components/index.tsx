@@ -219,8 +219,8 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 		<div
 		    key={i}
 		>
-		    {row.map((value) => {
-			const key = v4();
+		    {row.map((value, j) => {
+			const key = (j + 1) + (i * row.length) + "";
 			const Cell = props.cell(value, key);
 			return Cell;
 		    })}
