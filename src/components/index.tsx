@@ -45,7 +45,7 @@ interface Props<S extends Scalar = Scalar> {
  * @returns React node
  */
 const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
-    // Effectively transpose the matrix in the data prop. 
+    // Transpose the data in order to get arrays of columns in order. 
     const columns = React.useMemo(() => {
 	const cs: GridModel<Scalar | number> = [];
 	for (const [, row] of props.data.entries()) {
@@ -61,7 +61,7 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     }, [props.data]);
     // Keep a local copy of the data that does not change across renders.
     const rows = React.useMemo(() => {
-	return props.data.map(row => row);
+	return props.data;
     }, [props.data]);
     type Pair = [Scalar, Scalar]
     type Locations = Set<Pair>;
