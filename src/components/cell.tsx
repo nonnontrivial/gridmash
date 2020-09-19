@@ -9,6 +9,9 @@ interface Props<S extends Scalar = Scalar> {
     style?: {
 	[key: string]: string | number;
     };
+    onClick?(e: React.MouseEvent): void;
+    onMouseEnter?(e: React.MouseEvent): void;
+    onMouseLeave?(e: React.MouseEvent): void;
 }
 
 /**
@@ -19,7 +22,12 @@ interface Props<S extends Scalar = Scalar> {
  */
 const Cell: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
-	<div style={{ ...props.style }}>
+	<div
+	    style={props.style}
+	    onClick={props.onClick}
+	    onMouseEnter={props.onMouseEnter}
+	    onMouseLeave={props.onMouseLeave}
+	>
 	    {props.value}
 	</div>
     );
