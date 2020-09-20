@@ -6,6 +6,7 @@ import { Scalar } from "../model";
 
 interface Props<S extends Scalar = Scalar> {
     value: S;
+    ref?: React.Ref<any>;
     style?: {
 	[key: string]: string | number;
     };
@@ -24,6 +25,7 @@ const Cell: React.FC<Props> = (props: Props): React.ReactElement => {
     return (
 	<div
 	    style={props.style}
+	    ref={props.ref}
 	    onClick={props.onClick}
 	    onMouseEnter={props.onMouseEnter}
 	    onMouseLeave={props.onMouseLeave}
