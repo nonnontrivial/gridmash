@@ -6,7 +6,6 @@ import { Scalar } from "../model";
 
 interface Props<S extends Scalar = Scalar> {
     value: S;
-    ref?: React.Ref<any>;
     style?: {
 	[key: string]: string | number;
     };
@@ -21,19 +20,20 @@ interface Props<S extends Scalar = Scalar> {
  * @param {Props} props Props passed to the component
  * @returns React node
  */
-const Cell: React.FC<Props> = (props: Props): React.ReactElement => {
-    return (
-	<div
-	    style={props.style}
-	    ref={props.ref}
-	    onClick={props.onClick}
-	    onMouseEnter={props.onMouseEnter}
-	    onMouseLeave={props.onMouseLeave}
-	>
-	    {props.value}
-	</div>
-    );
-}
+const Cell: React.FC<Props> = React.forwardRef(
+    (props: Props, ref: React.Ref<any>): React.ReactElement => {
+	return (
+	    <div
+		style={props.style}
+		ref={ref}
+		onClick={props.onClick}
+		onMouseEnter={props.onMouseEnter}
+		onMouseLeave={props.onMouseLeave}
+	    >
+		{props.value}
+	    </div>
+	);
+    });
 
 export {
     Cell,
