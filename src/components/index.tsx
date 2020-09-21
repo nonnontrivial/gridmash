@@ -22,10 +22,12 @@ export {
     KeyEvent,
 } from "../model";
 
+type KeyMap = Map<keyof typeof Motion, keyof KeyboardEvent>;
+
 interface Props<S extends Scalar = Scalar> {
     data: GridModel<S>
     cell: (v: S, k: string) => React.ReactElement;
-    keyMap?: Map<keyof typeof Motion, string>;
+    keyMap?: KeyMap;
     keyEvent?: KeyEvent;
     reconciliationCondition(a: S): boolean;
     reconcile(a: S, b: S): S;
@@ -183,13 +185,14 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	props.onReconciliation
     ]);
     // Mapping between direction and key event name.
-    const keys = React.useMemo<Map<keyof typeof Motion, string>>(() => {
+    const keys = React.useMemo<KeyMap>(() => {
 	if (props.keyMap) {
 	    return props.keyMap;
 	}
-	return defaultKeyMap;
+	return defaultKeyMap as KeyMap;
     }, [props.keyMap]);
     // Register event listener on motions to trigger reconciliations.
+    // Remove the event listener on unmount.
     React.useEffect(() => {
 	const onKeyEvent = (e: React.KeyboardEvent<HTMLDivElement>) => {
 	    switch (e.key) {
