@@ -1,19 +1,20 @@
 /**
- * @fileoverview Exports interfaces, types, and utils
+ * @fileoverview Exports Utils, interfaces, and types.
  */
 import * as React from "react";
 
 /**
- * Forms new array of react children suitable for rendering in the grid.
+ * Forms new array of children suitable for rendering in the grid.
  *
  * @param children React children
  * @returns Array of React nodes 
  */
 export function renderInOrder(children: React.ReactNode): React.ReactNode[] {
-    // TODO: switch API to allow this to work
     const elements: React.ReactNode[] = [];
     React.Children.forEach(children, child => {
-	elements.push(child);
+	if (React.isValidElement(child)) {
+	    elements.push(child);
+	}
     });
     return elements;
 };

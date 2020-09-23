@@ -110,6 +110,11 @@ export default (props: Props): React.ReactElement => {
     return (
 	<Grid
 	    data={[[]]}
+	    cell={() => {
+		return (
+		    <Cell value={0} />
+		);
+	    }}
 	    keyMap={keyMap}
 	/>
     );

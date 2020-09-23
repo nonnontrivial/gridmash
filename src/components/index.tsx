@@ -12,7 +12,6 @@ import {
     Reconciliation,
 } from "../model";
 
-// export * from "../hooks";
 export * from "./cell";
 export {
     Grid as GridModel,
@@ -120,61 +119,61 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	// on the given motion.
 	switch (motion) {
 	    case Motion.UP:
-		for (let j = columnSize - 1; j >= 0; j -= 1) {
-		    const locationsInColumn: Locations = new Set([]);
-		    const i = rowSize - 1;
-		    let ii = i;
-		    while (ii - 1 >= 0) {
-			const value = props.data[ii][j];
-			if (props.reconciliationCondition(value)) {
-			    locationsInColumn.add([ii, j]);
-			}
-			ii -= 1;
+	    for (let j = columnSize - 1; j >= 0; j -= 1) {
+		const locationsInColumn: Locations = new Set([]);
+		const i = rowSize - 1;
+		let ii = i;
+		while (ii - 1 >= 0) {
+		    const value = props.data[ii][j];
+		    if (props.reconciliationCondition(value)) {
+			locationsInColumn.add([ii, j]);
 		    }
-		    reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
+		    ii -= 1;
 		}
+		reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
+	    }
 		break;
 	    case Motion.DOWN:
-		for (const [j] of columns.entries()) {
-		    const locationsInColumn: Locations = new Set([]);
-		    const i = 0;
-		    let ii = i;
-		    while (ii + 1 <= rowSize - 1) {
-			ii += 1;
-			const value = props.data[ii][j];
-			if (props.reconciliationCondition(value)) {
-			    locationsInColumn.add([ii, j]);
-			}
+	    for (const [j] of columns.entries()) {
+		const locationsInColumn: Locations = new Set([]);
+		const i = 0;
+		let ii = i;
+		while (ii + 1 <= rowSize - 1) {
+		    ii += 1;
+		    const value = props.data[ii][j];
+		    if (props.reconciliationCondition(value)) {
+			locationsInColumn.add([ii, j]);
 		    }
-		    reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
 		}
+		reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
+	    }
 		break;
 	    case Motion.LEFT:
-		for (const [i, r] of rows.entries()) {
-		    const locationsInRow: Locations = new Set([]);
-		    let jj = rowSize - 1;
-		    for (let j = jj; j >= 0; j -= 1) {
-			jj = j;
-			const value = r[j];
-			if (props.reconciliationCondition(value)) {
-			    locationsInRow.add([i, j]);
-			}
+	    for (const [i, r] of rows.entries()) {
+		const locationsInRow: Locations = new Set([]);
+		let jj = rowSize - 1;
+		for (let j = jj; j >= 0; j -= 1) {
+		    jj = j;
+		    const value = r[j];
+		    if (props.reconciliationCondition(value)) {
+			locationsInRow.add([i, j]);
 		    }
-		    reconcileMarkedLocations(locationsInRow, [i, jj], motion);
 		}
+		reconcileMarkedLocations(locationsInRow, [i, jj], motion);
+	    }
 		break;
 	    case Motion.RIGHT:
-		for (const [i, r] of rows.entries()) {
-		    const locationsInRow: Locations = new Set([]);
-		    let jj = 0;
-		    for (const [j, value] of r.entries()) {
-			jj = j;
-			if (props.reconciliationCondition(value)) {
-			    locationsInRow.add([i, j]);
-			}
+	    for (const [i, r] of rows.entries()) {
+		const locationsInRow: Locations = new Set([]);
+		let jj = 0;
+		for (const [j, value] of r.entries()) {
+		    jj = j;
+		    if (props.reconciliationCondition(value)) {
+			locationsInRow.add([i, j]);
 		    }
-		    reconcileMarkedLocations(locationsInRow, [i, jj], motion);
 		}
+		reconcileMarkedLocations(locationsInRow, [i, jj], motion);
+	    }
 		break;
 	}
     }, [
@@ -197,16 +196,16 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	const onKeyEvent = (e: React.KeyboardEvent<HTMLDivElement>) => {
 	    switch (e.key) {
 		case keys.get(Motion.UP):
-		    reconcile(Motion.UP);
+		reconcile(Motion.UP);
 		    break;
 		case keys.get(Motion.DOWN):
-		    reconcile(Motion.DOWN);
+		reconcile(Motion.DOWN);
 		    break;
 		case keys.get(Motion.LEFT):
-		    reconcile(Motion.LEFT);
+		reconcile(Motion.LEFT);
 		    break;
 		case keys.get(Motion.RIGHT):
-		    reconcile(Motion.RIGHT);
+		reconcile(Motion.RIGHT);
 		    break;
 	    }
 	};
