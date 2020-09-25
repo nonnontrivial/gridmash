@@ -31,8 +31,8 @@ export interface Reconciliation<S extends Scalar = number> {
     args: Tuple<S>;
     result: S;
     location: {
-	src: Tuple<S>,
-	dst: Tuple<S>,
+	src: Tuple<number>,
+	dst: Tuple<number>,
     };
 }
 

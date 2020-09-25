@@ -23,7 +23,7 @@ export {
 
 type KeyMap = Map<keyof typeof Motion, keyof KeyboardEvent>;
 
-interface Props<S extends Scalar = Scalar> {
+interface Props<S extends Scalar> {
     data: GridModel<S>
     cell: (v: S, k: string) => React.ReactElement;
     keyMap?: KeyMap;
@@ -32,6 +32,7 @@ interface Props<S extends Scalar = Scalar> {
     reconcile(a: S, b: S): S;
     onReconciliation(rs: Reconciliation<S>): void;
     className?: string;
+    innerRef?: React.Ref<any>;
 }
 
 /**
@@ -46,10 +47,10 @@ interface Props<S extends Scalar = Scalar> {
  * @param {Props} props Props passed to the component
  * @returns React node
  */
-const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
+const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
     // Transpose the data in order to get arrays of columns in order. 
     const columns = React.useMemo(() => {
-	const cs: GridModel<Scalar | number> = [];
+	const cs: GridModel<S> = [];
 	for (const [, row] of props.data.entries()) {
 	    for (const [j, col] of row.entries()) {
 		if (!cs[j]) {
@@ -65,7 +66,7 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     const rows = React.useMemo(() => {
 	return props.data;
     }, [props.data]);
-    type Pair = [Scalar, Scalar]
+    type Pair = [number, number]
     type Locations = Set<Pair>;
     // Calls reconciliation method provided in props on pairs of condition-
     // passing locations in the data prop.
@@ -82,7 +83,7 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
 	    if (markedLocations.size % 2 !== 0) {
 		markedLocations.delete([ii, jj]);
 	    }
-	    let prev: [Scalar, Scalar] | null = null;
+	    let prev: [number, number] | null = null;
 	    let index = 0;
 	    for (const l of markedLocations) {
 		// In the case that this is an even index, we need to track it
@@ -233,6 +234,7 @@ const Grid: React.FC<Props> = (props: Props): React.ReactElement => {
     }, [props.data]);
     return (
 	<div
+	    ref={props.innerRef}
 	    className={props.className}
 	>
 	    {cells}
