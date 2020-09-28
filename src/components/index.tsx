@@ -63,9 +63,7 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
 	return cs;
     }, [props.data]);
     // Keep a local copy of the data that does not change across renders.
-    const rows = React.useMemo(() => {
-	return props.data;
-    }, [props.data]);
+    const rows = React.useMemo(() => props.data, [props.data]);
     type Pair = [number, number]
     type Locations = Set<Pair>;
     // Calls reconciliation method provided in props on pairs of condition-
@@ -111,13 +109,12 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
 	    }
 	}, [rows, columns]);
     // Finds all reconciliations in the data and sends them to the callback prop.
+    // Order of iteration on data is motion dependent.
     const reconcile = React.useCallback((motion: keyof typeof Motion): void => {
 	const [column] = columns;
 	const [row] = props.data;
 	const columnSize = column.length;
 	const rowSize = row.length;
-	// Establish locations where reconciliations should take place depending
-	// on the given motion.
 	switch (motion) {
 	    case Motion.UP:
 	    for (let j = columnSize - 1; j >= 0; j -= 1) {
@@ -182,7 +179,7 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
 	columns,
 	props.reconciliationCondition,
 	props.reconcile,
-	props.onReconciliation
+	props.onReconciliation,
     ]);
     // Mapping between direction and key event name.
     const keys = React.useMemo<KeyMap>(() => {
