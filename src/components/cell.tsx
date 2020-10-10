@@ -5,13 +5,13 @@ import * as React from "react";
 import { Scalar } from "../model";
 
 interface Props<S extends Scalar = Scalar> {
-    value: S;
-    style?: {
-	[key: string]: string | number;
-    };
-    onClick?(e: React.MouseEvent): void;
-    onMouseEnter?(e: React.MouseEvent): void;
-    onMouseLeave?(e: React.MouseEvent): void;
+  value: S;
+  style?: {
+    [key: string]: string | number;
+  };
+  onClick?(e: React.MouseEvent): void;
+  onMouseEnter?(e: React.MouseEvent): void;
+  onMouseLeave?(e: React.MouseEvent): void;
 }
 
 /**
@@ -21,21 +21,21 @@ interface Props<S extends Scalar = Scalar> {
  * @returns React node
  */
 const Cell: React.FC<Props> = React.forwardRef(
-    (props: Props, ref: React.Ref<any>): React.ReactElement => {
-	return (
-	    <div
-		style={props.style}
-		ref={ref}
-		onClick={props.onClick}
-		onMouseEnter={props.onMouseEnter}
-		onMouseLeave={props.onMouseLeave}
-	    >
-		{props.value}
-	    </div>
-	);
-    });
+  (props: Props, ref: React.Ref<any>): React.ReactElement => {
+    return (
+      <div
+        style={props.style}
+        ref={ref}
+        onClick={props.onClick}
+        onMouseEnter={props.onMouseEnter}
+        onMouseLeave={props.onMouseLeave}
+      >
+        {props.value}
+      </div>
+    );
+  });
 
 export {
-    Cell,
+  Cell,
 }
 
