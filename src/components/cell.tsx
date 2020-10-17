@@ -33,9 +33,7 @@ const Cell: React.FC<Props> = React.forwardRef(
         {props.value}
       </div>
     );
-  });
+  }
+);
 
-export {
-  Cell,
-}
-
+export { Cell };

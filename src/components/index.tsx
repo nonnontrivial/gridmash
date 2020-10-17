@@ -24,7 +24,7 @@ export {
 type KeyMap = Map<keyof typeof Motion, keyof KeyboardEvent>;
 
 interface Props<S extends Scalar> {
-  data: GridModel<S>
+  data: GridModel<S>;
   cell: (v: S, k: string) => React.ReactElement;
   keyMap?: KeyMap;
   keyEvent?: KeyEvent;
@@ -48,7 +48,7 @@ interface Props<S extends Scalar> {
  * @returns React node
  */
 const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
-  // Transpose the data in order to get arrays of columns in order. 
+  // Transpose the data in order to get arrays of columns in order.
   const columns = React.useMemo(() => {
     const cs: GridModel<S> = [];
     for (const [, row] of props.data.entries()) {
@@ -64,7 +64,7 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
   }, [props.data]);
   // Keep a local copy of the data that does not change across renders.
   const rows = React.useMemo(() => props.data, [props.data]);
-  type Pair = [number, number]
+  type Pair = [number, number];
   type Locations = Set<Pair>;
   // Calls reconciliation method provided in props on pairs of condition-
   // passing locations in the data prop.
@@ -72,7 +72,7 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
     (
       locations: Locations,
       lastLocation: Pair,
-      motion: keyof typeof Motion,
+      motion: keyof typeof Motion
     ): void => {
       const [ii, jj] = lastLocation;
       const markedLocations = locations;
@@ -107,80 +107,85 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
           },
         });
       }
-    }, [rows, columns]);
+    },
+    [rows, columns]
+  );
   // Finds all reconciliations in the data and sends them to the callback prop.
   // Order of iteration on data is motion dependent.
-  const reconcile = React.useCallback((motion: keyof typeof Motion): void => {
-    const [column] = columns;
-    const [row] = props.data;
-    const columnSize = column.length;
-    const rowSize = row.length;
-    switch (motion) {
-      case Motion.UP:
-      for (let j = columnSize - 1; j >= 0; j -= 1) {
-        const locationsInColumn: Locations = new Set([]);
-        const i = rowSize - 1;
-        let ii = i;
-        while (ii - 1 >= 0) {
-          const value = props.data[ii][j];
-          if (props.reconciliationCondition(value)) {
-            locationsInColumn.add([ii, j]);
+  const reconcile = React.useCallback(
+    (motion: keyof typeof Motion): void => {
+      const [column] = columns;
+      const [row] = props.data;
+      const columnSize = column.length;
+      const rowSize = row.length;
+      switch (motion) {
+        case Motion.UP:
+          for (let j = columnSize - 1; j >= 0; j -= 1) {
+            const locationsInColumn: Locations = new Set([]);
+            const i = rowSize - 1;
+            let ii = i;
+            while (ii - 1 >= 0) {
+              const value = props.data[ii][j];
+              if (props.reconciliationCondition(value)) {
+                locationsInColumn.add([ii, j]);
+              }
+              ii -= 1;
+            }
+            reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
           }
-          ii -= 1;
-        }
-        reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
-      }
-        break;
-      case Motion.DOWN:
-      for (const [j] of columns.entries()) {
-        const locationsInColumn: Locations = new Set([]);
-        const i = 0;
-        let ii = i;
-        while (ii + 1 <= rowSize - 1) {
-          ii += 1;
-          const value = props.data[ii][j];
-          if (props.reconciliationCondition(value)) {
-            locationsInColumn.add([ii, j]);
+          break;
+        case Motion.DOWN:
+          for (const [j] of columns.entries()) {
+            const locationsInColumn: Locations = new Set([]);
+            const i = 0;
+            let ii = i;
+            while (ii + 1 <= rowSize - 1) {
+              ii += 1;
+              const value = props.data[ii][j];
+              if (props.reconciliationCondition(value)) {
+                locationsInColumn.add([ii, j]);
+              }
+            }
+            reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
           }
-        }
-        reconcileMarkedLocations(locationsInColumn, [ii, j], motion);
-      }
-        break;
-      case Motion.LEFT:
-      for (const [i, r] of rows.entries()) {
-        const locationsInRow: Locations = new Set([]);
-        let jj = rowSize - 1;
-        for (let j = jj; j >= 0; j -= 1) {
-          jj = j;
-          const value = r[j];
-          if (props.reconciliationCondition(value)) {
-            locationsInRow.add([i, j]);
+          break;
+        case Motion.LEFT:
+          for (const [i, r] of rows.entries()) {
+            const locationsInRow: Locations = new Set([]);
+            let jj = rowSize - 1;
+            for (let j = jj; j >= 0; j -= 1) {
+              jj = j;
+              const value = r[j];
+              if (props.reconciliationCondition(value)) {
+                locationsInRow.add([i, j]);
+              }
+            }
+            reconcileMarkedLocations(locationsInRow, [i, jj], motion);
           }
-        }
-        reconcileMarkedLocations(locationsInRow, [i, jj], motion);
-      }
-        break;
-      case Motion.RIGHT:
-      for (const [i, r] of rows.entries()) {
-        const locationsInRow: Locations = new Set([]);
-        let jj = 0;
-        for (const [j, value] of r.entries()) {
-          jj = j;
-          if (props.reconciliationCondition(value)) {
-            locationsInRow.add([i, j]);
+          break;
+        case Motion.RIGHT:
+          for (const [i, r] of rows.entries()) {
+            const locationsInRow: Locations = new Set([]);
+            let jj = 0;
+            for (const [j, value] of r.entries()) {
+              jj = j;
+              if (props.reconciliationCondition(value)) {
+                locationsInRow.add([i, j]);
+              }
+            }
+            reconcileMarkedLocations(locationsInRow, [i, jj], motion);
           }
-        }
-        reconcileMarkedLocations(locationsInRow, [i, jj], motion);
+          break;
       }
-        break;
-    }
-  }, [
-    rows,
-    columns,
-    props.reconciliationCondition,
-    props.reconcile,
-    props.onReconciliation,
-  ]);
+    },
+    [
+      rows,
+      columns,
+      props.reconciliationCondition,
+      props.reconcile,
+      props.onReconciliation,
+    ]
+  );
   // Mapping between direction and key event name.
   const keys = React.useMemo<KeyMap>(() => {
     if (props.keyMap) {
@@ -194,16 +199,16 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
     const onKeyEvent = (e: React.KeyboardEvent<HTMLDivElement>) => {
       switch (e.key) {
         case keys.get(Motion.UP):
-        reconcile(Motion.UP);
+          reconcile(Motion.UP);
           break;
         case keys.get(Motion.DOWN):
-        reconcile(Motion.DOWN);
+          reconcile(Motion.DOWN);
           break;
         case keys.get(Motion.LEFT):
-        reconcile(Motion.LEFT);
+          reconcile(Motion.LEFT);
           break;
         case keys.get(Motion.RIGHT):
-        reconcile(Motion.RIGHT);
+          reconcile(Motion.RIGHT);
           break;
       }
     };
@@ -211,17 +216,15 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
     window.addEventListener(keyEvent, onKeyEvent as any);
     return () => {
       window.removeEventListener(keyEvent, onKeyEvent as any);
-    }
+    };
   }, [props.keyMap]);
   // Pass values to cells before rendering.
   const cells = React.useMemo(() => {
     return props.data.map((row, i) => {
       return (
-        <div
-          key={i}
-        >
+        <div key={i}>
           {row.map((value, j) => {
-            const key = (j + 1) + (i * row.length) + "";
+            const key = j + 1 + i * row.length + "";
             const Cell = props.cell(value, key);
             return Cell;
           })}
@@ -230,10 +233,7 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
     });
   }, [props.data]);
   return (
-    <div
-      ref={props.innerRef}
-      className={props.className}
-    >
+    <div ref={props.innerRef} className={props.className}>
       {cells}
     </div>
   );
@@ -241,6 +241,4 @@ const Grid = <S extends Scalar>(props: Props<S>): React.ReactElement => {
 
 export default Grid;
 
-export {
-  Grid,
-}
+export { Grid };
